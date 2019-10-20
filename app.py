@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify, redirect, request
 import requests
 import json
 from yelp_utils import headers, yelp_url
@@ -8,7 +8,7 @@ app=Flask(__name__)
 
 @app.route('/')
 def index():
-    return json.dumps({'title': 'hey'})
+    return jsonify({'title': 'hey'})
 
 @app.route('/summary/<location>')
 def summary(location):
@@ -40,7 +40,7 @@ def summary(location):
             'avg_rating': sum_ratings / num_ratings,
             'total_reviews': num_reviews
         }
-        return json.dumps(data)
+        return jsonify(data)
 
 @app.route('/list/<location>')
 def list(location):
@@ -64,8 +64,11 @@ def list(location):
             }
             businesses_list.append(business_info)
     businesses_list = sorted(businesses_list, key=lambda business : business['rating'], reverse=True)
-    return json.dumps(businesses_list)
+    return jsonify(businesses_list)
 
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return redirect("/")
 
 app.run(port=3000, debug=True)
